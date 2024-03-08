@@ -1,0 +1,220 @@
+body {
+	font-family: Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+	background-color: #f0f0f0;
+}
+
+.container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	position: relative;
+}
+
+.form-container {
+	max-width: 30%;
+	/* width: 30%; */
+	/* margin-left: 35%;
+	margin-right: 35%; */
+	background-color: #fff;
+	padding: 20px;
+	border-radius: 10px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	text-align: center;
+}
+
+h2 {
+	text-align: center;
+	margin-bottom: 20px;
+}
+
+img {
+	max-width: 150px;
+	margin-bottom: 20px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="submit"] {
+	width: 100%;
+	padding: 10px;
+	margin-bottom: 15px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	box-sizing: border-box;
+	font-size: 16px;
+}
+
+input[type="submit"] {
+	background-color: #2C3E50;
+	color: white;
+	cursor: pointer;
+}
+
+input[type="submit"]:hover {
+	background-color: #3a526a;
+}
+
+.switch-form {
+	text-align: center;
+}
+
+.switch-form div {
+	color: #2C3E50;
+	text-decoration: none;
+}
+
+.home-screen {
+	display: flex;
+}
+
+.messages-panel {
+	flex: 1;
+	padding: 20px;
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 20px;
+}
+
+.header h2 {
+	font-size: 24px;
+}
+
+.thread-toggle-btn {
+	background-color: #3498DB;
+	color: #fff;
+	border: none;
+	padding: 10px 20px;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+.thread-toggle-btn:hover {
+	background-color: #2980B9;
+}
+
+.messages {
+	display: flex;
+	flex-direction: column;
+}
+
+.message-conversation {
+	background-color: #ECF0F1;
+	padding: 20px;
+	border-radius: 5px;
+	margin-bottom: 20px;
+}
+
+.thread {
+	background-color: #ECF0F1;
+	padding: 20px;
+	border-radius: 5px;
+}
+
+.channels-panel {
+	width: 200px;
+	background-color: #2C3E50;
+	color: #fff;
+	padding: 20px;
+	box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.2);
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	overflow-y: auto;
+}
+
+.channels-panel h2 {
+	margin-bottom: 20px;
+	font-size: 18px;
+}
+
+.channels-panel ul {
+	list-style-type: none;
+	padding: 0;
+}
+
+.channels-panel li {
+	padding: 10px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+.channels-panel li:hover {
+	background-color: #34495E;
+}
+
+.channels-panel .active {
+	background-color: #2980B9;
+}
+
+.thread-panel {
+	flex: 1;
+	padding: 20px;
+	background-color: #f9f9f9;
+	border-left: 1px solid #ccc;
+}
+
+.login-button,
+.logout-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.login-button {
+    background-color: #3498db;
+    color: white;
+}
+
+.logout-button {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.signup-prompt-container {
+    text-align: center;
+}
+
+.signup-button {
+    padding: 10px 20px;
+    background-color: #2C3E50;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.signup-button:hover {
+    background-color: #3a526a;
+}
+
+.password-mismatch {
+    color: red;
+}
+
+@media only screen and (max-width: 850px) {
+
+	.discover,
+	.form-container {
+		max-width: 60%;
+	}
+
+	.news-container {
+		display: grid;
+		grid-template-columns: repeat(10, 1fr);
+		grid-template-rows: repeat(35, 5vw);
+	}
+}
