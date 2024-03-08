@@ -1,9 +1,9 @@
-const LogoutButton = () => {
+export default function LogoutButton() {
     const history = ReactRouterDOM.useHistory();
 
-    const handleLogout = () => {
+    function handleLogout() {
         localStorage.clear();
-        history.push('homepage');
+        history.push('/belay');
     };
 
     return (
@@ -12,5 +12,3 @@ const LogoutButton = () => {
         </button>
     );
 };
-
-export default LogoutButton;

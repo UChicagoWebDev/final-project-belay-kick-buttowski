@@ -1,14 +1,19 @@
 import Image from './Image'
-import {createUrl} from '../helpers/utils.js';
+import {createUrl, isLoggedin} from '../helpers/utils.js';
 import {LOGIN_POINT, loginDict} from '../helpers/endpoints.js';
 
 export default function Login(){
     console.log("Login");
+    const history = ReactRouterDOM.useHistory();
+    if(isLoggedin()){
+        history.push('/belay')
+        return <></>
+    }
+    document.title = 'Login';
     const [formData, setFormData] = React.useState({
         username: '',
         password: ''
     });
-    const history = ReactRouterDOM.useHistory();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -25,7 +30,7 @@ export default function Login(){
                 password: ''
             });
 
-            history.push('homepage');
+            history.push('/belay');
         }
     };
 
@@ -38,7 +43,7 @@ export default function Login(){
     };
     
     const openSignUp = (e) => {
-        history.push('signup');
+        history.push('/signup');
     };
 
     return (<>

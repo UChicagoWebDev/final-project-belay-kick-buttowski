@@ -1,17 +1,21 @@
 import Image from './Image.js'
-import {createUrl} from '../helpers/utils.js';
+import {createUrl, isLoggedin} from '../helpers/utils.js';
 import {SIGNUP_DETAILS_POINT, loginDict} from '../helpers/endpoints.js';
 
 export default function Signup(){
     console.log("Signup");
+    const history = ReactRouterDOM.useHistory();
+    if(isLoggedin()){
+        history.push('/belay')
+        return <></>
+    }
+    document.title = 'Signup';
     const [formData, setFormData] = React.useState({
         username: '',
         password: '',
         repeatedPassword: ''
     });
     const [passwordsMatch, setPasswordsMatch] = React.useState(true);
-
-    const history = ReactRouterDOM.useHistory();
 
     const handleSignup = async (e) => {
         if(!passwordsMatch){
@@ -32,7 +36,7 @@ export default function Signup(){
                 repeatedPassword: ''
             });
             
-            history.push('homepage');
+            history.push('/belay');
         }
     };
 
@@ -50,7 +54,7 @@ export default function Signup(){
     };
 
     const openLogin = (e) => {
-        history.push('login');
+        history.push('/login');
     };
 
     return (<>

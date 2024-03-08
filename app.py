@@ -42,13 +42,20 @@ def query_db(query, args=(), one=False):
 # TODO: If your app sends users to any other routes, include them here.
 #       (This should not be necessary).
 @app.route('/')
-@app.route('/homepage')
+@app.route('/belay')
 @app.route('/login')
 @app.route('/signup')
+@app.route('/update')
+@app.route('/newchannel')
 @app.route('/channel/<channel_id>')
 def index(channel_id=None):
     return app.send_static_file('index.html')
 
+def validate_user_api_key(req):
+    api_key = req.headers['Api-Key']
+    if api_key:
+        return query_db('select * from users where api_key = ?', [api_key], one=True)
+    return None
 
 @app.route('/api/login', methods = ['POST'])
 def login():
@@ -79,3 +86,140 @@ def signup_details():
         return jsonify({'api_key': user['api_key'], 'user_id': user['id'], 'user_name': user['name']}), 200
     
     return jsonify({'error': 'Method Not Allowed'}), 405
+
+@app.route('/api/room/messages', methods=['GET'])
+def get_all_messages():
+    out = {'allM': []}
+    user = validate_user_api_key(request)
+    if not user:
+        return app.send_static_file('404.html'), 401
+    if request.method == 'GET':
+        room_id = request.args['room_id']
+        msgs = query_db('with tmp as (select count(m.replies_to) as replies, m.replies_to, m.id, u.name, m.body, m.channel_id from messages m, ' + 
+                        'users u where m.channel_id = ? and m.user_id = u.id and m.replies_to > 0 group by m.replies_to ' + 
+                        'order by m.id), tmp2 as (select ifnull(tmp.replies, 0) as repliescount, m.id, u.name, m.body, ' + 
+                        'm.replies_to, m.channel_id from messages m inner join users u on m.user_id = u.id left join tmp on m.id = tmp.replies_to and m.channel_id = tmp.channel_id) ' + 
+                        'select * from tmp2 where tmp2.replies_to == 0 and tmp2.channel_id = ?', [room_id, room_id], one=False)
+        
+        if not msgs:
+            return out
+        msgsList = []
+        for msg in msgs:
+            msgsList.append({'id': msg[1], 'name': msg[2], 'body': msg[3], 'replies': msg[0]})
+        out['allM'] = msgsList
+    return out, 200
+
+@app.route('/api/rooms', methods=['GET'])
+def get_all_rooms():
+    out = {'allC': []}
+    user = validate_user_api_key(request)
+    if not user:
+        return app.send_static_file('404.html'), 401
+    if request.method == 'GET':
+        rooms = query_db('select * from channels')
+        print(rooms)
+        roomsList = []
+        if rooms is not None:
+            for msg in rooms:
+                roomsList.append({'id': msg['id'], 'name': msg['channel_name']})
+        out['allC'] = roomsList
+    return out, 200
+
+@app.route('/api/room/post', methods=['POST'])
+def post_message():
+    user = validate_user_api_key(request)
+    if not user:
+        return app.send_static_file('404.html'), 401
+    if request.method == 'POST':
+        u = query_db('insert into messages (user_id, channel_id, body, replies_to) ' + 
+            'values (?, ?, ?, ?) returning id, user_id, channel_id, body',
+            (request.headers['User-Id'], request.args['room_id'], request.args['body'], 0), one=True)
+        return {'status': 'Success'}, 200
+
+
+@app.route('/api/update/username', methods=['POST'])
+def update_username():
+    user = validate_user_api_key(request)
+    if not user:
+        return app.send_static_file('404.html'), 401
+    
+    if request.method == 'POST':
+        temp = query_db('update users set name = ? where api_key = ? returning id, name',
+            (request.args['user_name'], request.headers['Api-Key']),
+            one=True
+        )
+        return {'name': temp['name']}
+    return {}
+
+@app.route('/api/update/password', methods=['POST'])
+def update_password():
+    user = validate_user_api_key(request)
+    if not user:
+        return app.send_static_file('404.html'), 401
+    
+    if request.method == 'POST':
+        temp = query_db('update users set password = ? where api_key = ? returning id, name',
+            (request.headers['password'], request.headers['Api-Key']),
+            one=True
+        )
+        return {}, 200
+    return {'Status': 'Failed for Unknown Reasons'}, 403
+
+
+@app.route('/api/rooms/new', methods=['POST'])
+def create_room():
+    print("create room")
+    user = validate_user_api_key(request)
+    if not user:
+        return app.send_static_file('404.html'), 401
+
+    if (request.method == 'POST'):
+        name = request.args['channelName']
+        room = query_db('insert into channels (channel_name) values (?) returning id', [name], one=True)            
+        return {'channel_id': room["id"]}
+
+@app.route('/api/update/room', methods=['POST'])
+def update_room():
+    user = validate_user_api_key(request)
+    if not user:
+        return app.send_static_file('404.html'), 401
+    
+    if request.method == 'POST':
+        temp = query_db('update channels set channel_name = ? where id = ? returning id, channel_name',
+            (request.args['name'], request.args['room_id']),
+            one=True
+        )
+        return {}, 200
+    return app.send_static_file('404.html'), 401
+
+
+@app.route('/api/room/reply', methods=['POST'])
+def post_reply():
+    user = validate_user_api_key(request)
+    if not user:
+        return app.send_static_file('404.html'), 401
+    if request.method == 'POST':
+        u = query_db('insert into messages (user_id, channel_id, body, replies_to) ' + 
+            'values (?, ?, ?, ?) returning id, user_id, channel_id, body, replies_to',
+            (request.headers['User-Id'], request.args['room_id'], request.args['body'], request.args['message_id'] ), one=True)
+        return {'status': 'Success'}, 200
+
+@app.route('/api/room/replies', methods=['GET'])
+def get_all_replies():
+    out = {'allR': []}
+    user = validate_user_api_key(request)
+    if not user:
+        return app.send_static_file('404.html'), 401
+    if request.method == 'GET':
+        room_id = request.args['room_id']
+        message_id = request.args['message_id']
+        msgs = query_db('select m.id, u.name, m.body from messages m, users u ' + 
+                       'where m.channel_id = ? and m.replies_to = ? and m.user_id = u.id order by m.id', [room_id, message_id], one=False)
+        if not msgs:
+            return out
+        msgsList = []
+        for msg in msgs:
+            msgsList.append({'id': msg[0], 'name': msg[1], 'body': msg[2], 'replies': 1})
+        out['allR'] = msgsList
+        print(out)
+    return out, 200
