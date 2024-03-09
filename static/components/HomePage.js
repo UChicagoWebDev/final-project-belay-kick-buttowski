@@ -4,9 +4,12 @@ import {createUrl, isLoggedin} from '../helpers/utils.js';
 import Header from './Header.js';
 
 export default function HomePage({channelNo, messageNo}) {
+  // console.log(channelNo)
+  // console.log(messageNo)
   const history = ReactRouterDOM.useHistory();
   if(!isLoggedin()){
-    history.push('/login')
+    const requestedPath = history.location.pathname;
+    history.push('/login', { requestedPath })
     return <></>
   }
   
@@ -19,12 +22,9 @@ export default function HomePage({channelNo, messageNo}) {
   const [messages, setMessages] = React.useState([]);
 
   const [reply, setReply] = React.useState('');
-  const [repliesOf, setRepliesOf] = React.useState(-1);
   const [replies, setReplies] = React.useState([]);
 
   const [unReadMsgs, setUnreadMsgs] = React.useState({});
-
-  const [imagesDiv, setImagesDiv] = React.useState();
 
   const [emojiUsers, setEmojiUsers] = React.useState([]);
   const [whichEmoji, setWhichEmoji] = React.useState({
@@ -99,8 +99,8 @@ function displayImages(message) {
 
     postReplyRequest.room_id = channelNo;
     postReplyRequest.body = reply;
-    postReplyRequest.message_id = repliesOf;
-    postReplyRequest.replies_to = repliesOf;
+    postReplyRequest.message_id = messageNo;
+    postReplyRequest.replies_to = messageNo;
     await createUrl(POST_REPLY_MESSAGE, postReplyRequest, {}, 'POST')
     setReply('');
   };
@@ -123,12 +123,12 @@ function displayImages(message) {
 
         getAllMsgsRequest.room_id = channelNo;
         getAllRepliesRequest.room_id = channelNo;
-        getAllRepliesRequest.message_id = repliesOf;
+        getAllRepliesRequest.message_id = messageNo;
         let retrievedMessages = await createUrl(ALL_MESSAGES_URL, getAllMsgsRequest, {}, 'GET');
         let rooms = await createUrl(ALL_ROOMS, {}, {}, 'GET')
         setMessages(retrievedMessages.allM);
         setAllChannels(rooms.allC);
-        if(repliesOf > 0){
+        if(messageNo > 0){
           let replies = await createUrl(ALL_REPLIES_URL, getAllRepliesRequest, {}, 'GET')
           setReplies(replies.allR);
         }
@@ -165,12 +165,14 @@ function displayImages(message) {
   };
 
   const handleReply = (messageId) => {
-    setRepliesOf(messageId);
+    history.push('/channel/' + channelNo + '/message/' + messageId);
+    // setRepliesOf(messageId);
     // console.log(`Replying to message with ID ${messageId}`);
   };
 
   const closeReplies = () => {
-    setRepliesOf(-1);
+    history.push('/channel/' + channelNo);
+    // setRepliesOf(-1);
   }
 
   return (
@@ -228,7 +230,7 @@ function displayImages(message) {
                               style={{ cursor: 'pointer', marginRight: '5px', fontSize: '20px' }}
                             >
                               <div className="tooltip">{emoji.symbol}{(emoji.id == whichEmoji['emojiId'] && msg.id == whichEmoji['msgId']) ? emojiUsers.length : <></>}
-                                  {(emoji.id == whichEmoji['emojiId'] && msg.id == whichEmoji['msgId'] && emojiUsers.length > 0) ? (<span className="tooltiptext">{emojiUsers.map((name) => name + ", ")}</span>) : <></>}
+                                  {(emoji.id == whichEmoji['emojiId'] && msg.id == whichEmoji['msgId'] && emojiUsers.length > 0) ? (<span className="tooltiptext">{emojiUsers.map((name, index) => name + (index < (emojiUsers.length - 1) ? ", ": ""))}</span>) : <></>}
                               </div>
                             </span>
                           ))}
@@ -255,7 +257,7 @@ function displayImages(message) {
         </div>
 
         {
-          repliesOf > 0 ? (
+          messageNo > 0 ? (
             <div className="replies-container">
               <div className="close-button" onClick={() => closeReplies()}>
                   <span className="material-symbols-outlined md-18">close</span>

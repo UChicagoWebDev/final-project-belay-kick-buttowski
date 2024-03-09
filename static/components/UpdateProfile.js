@@ -6,7 +6,8 @@ export default function UpdateProfile(){
     // console.log("Update");
     const history = ReactRouterDOM.useHistory();
     if(!isLoggedin()){
-        history.push('/login')
+        const requestedPath = history.location.pathname;
+        history.push('/login', { requestedPath })
         return <></>
     }
     document.title = 'Profile Update';
@@ -26,6 +27,7 @@ export default function UpdateProfile(){
         await createUrl(UPDATE_USERNAME, postUpdateNameRequest, {}, 'POST');
         localStorage.setItem('harshajulakanti-User-Name', formData.username);
         setFormData({
+            ...formData,
             username: '',
         });
     };
@@ -35,9 +37,10 @@ export default function UpdateProfile(){
             return
         }
         e.preventDefault();
-        postUpdatePassRequest.Password = formData.password;
+        postUpdatePassRequest.Password = formData.repeatedPassword;
         let postMsg = await createUrl(UPDATE_PASSWORD, {}, postUpdatePassRequest, 'POST');
         setFormData({
+            ...formData,
             password: '',
             repeatedPassword: ''
         });

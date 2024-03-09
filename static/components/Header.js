@@ -19,7 +19,7 @@ const Header = ({handleLogout}) => {
     const handleLogoutClick = () => {
         localStorage.clear();
         handleLogout();
-        history.push('/belay');
+        history.push('/login');
     };
 
     return (

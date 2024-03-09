@@ -6,7 +6,8 @@ export default function NewChannel(){
     // console.log("NewRoom");
     const history = ReactRouterDOM.useHistory();
     if(!isLoggedin()){
-        history.push('/login')
+        const requestedPath = history.location.pathname;
+        history.push('/login', { requestedPath })
         return <></>
     }
     document.title = 'Create Channel';

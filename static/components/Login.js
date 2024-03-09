@@ -5,10 +5,15 @@ import {LOGIN_POINT, loginDict} from '../helpers/endpoints.js';
 export default function Login(){
     // console.log("Login");
     const history = ReactRouterDOM.useHistory();
+    const location = ReactRouterDOM.useLocation();
     if(isLoggedin()){
         history.push('/belay')
         return <></>
     }
+    
+    const requestedPath = location.state?.requestedPath || '/';
+    console.log(requestedPath);
+
     document.title = 'Login';
     const [formData, setFormData] = React.useState({
         username: '',
@@ -30,7 +35,12 @@ export default function Login(){
                 password: ''
             });
 
-            history.push('/belay');
+            if(requestedPath != '/'){
+                history.replace(requestedPath);
+            }
+            else{
+                history.push('/belay');
+            }
         }
     };
 

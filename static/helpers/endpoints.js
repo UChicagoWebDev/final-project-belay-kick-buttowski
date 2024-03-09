@@ -1,8 +1,3 @@
-export const SPLASH = document.querySelector(".splash");
-export const PROFILE = document.querySelector(".profile");
-export const LOGIN = document.querySelector(".login");
-export const ROOM = document.querySelector(".room");
-
 export const POST_MESSAGE = '/api/room/post'
 export const POST_REPLY_MESSAGE = '/api/room/reply'
 export const SIGNUP_POINT = '/api/signup';

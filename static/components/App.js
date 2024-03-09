@@ -34,9 +34,15 @@ export default function App() {
                     <ReactRouterDOM.Route path="/login" component={Login} />
                     <ReactRouterDOM.Route path="/update" component={UpdateProfile} />
                     <ReactRouterDOM.Route
+                        path="/channel/:channelId/message/:messageId"
+                        render={props => (
+                            <HomePage channelNo={props.match.params.channelId} messageNo={props.match.params.messageId} />
+                        )}
+                    />
+                    <ReactRouterDOM.Route
                         path="/channel/:channelId"
                         render={props => (
-                            <HomePage channelNo={props.match.params.channelId} />
+                            <HomePage channelNo={props.match.params.channelId} messageNo={-1} />
                         )}
                     />
                     <ReactRouterDOM.Route

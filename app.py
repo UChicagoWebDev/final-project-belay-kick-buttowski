@@ -48,8 +48,8 @@ def query_db(query, args=(), one=False):
 @app.route('/update')
 @app.route('/newchannel')
 @app.route('/channel/<channel_id>')
-@app.route('/channel/message/<message_id>')
-def index(channel_id=None):
+@app.route('/channel/<channel_id>/message/<message_id>')
+def index(channel_id=None, message_id = None):
     return app.send_static_file('index.html')
 
 def validate_user_api_key(req):
@@ -160,7 +160,7 @@ def update_password():
     
     if request.method == 'POST':
         temp = query_db('update users set password = ? where api_key = ? returning id, name',
-            (request.headers['password'], request.headers['Api-Key']),
+            (request.headers['Password'], request.headers['Api-Key']),
             one=True
         )
         return {}, 200
