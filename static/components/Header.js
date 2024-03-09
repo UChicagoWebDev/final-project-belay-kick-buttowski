@@ -25,7 +25,7 @@ const Header = ({handleLogout}) => {
     return (
         <div className="header">
             <div className="left-section" onClick={createNewRoom}>
-                <button onClick={createNewRoom}>Cretae new channel</button>
+                <button onClick={createNewRoom}>Creat New Channel</button>
             </div>
             <div className="center-section" onClick={handleCompanyIconClick}>
                 <img src="/static/images/belay.png" alt="Company Icon" />
