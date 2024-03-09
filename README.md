@@ -1,3 +1,6 @@
+# Known Issue:
+Reloading the page while the url contains channel or message id is failing to load the react js packages, this feels like a React issue as reloading other pages isn't causing any issue. However, it is not an issue to swift through channels as long as we dont reload the channels/replies page.
+
 # Final Project: Belay (a Slack clone)
 
 40 points
