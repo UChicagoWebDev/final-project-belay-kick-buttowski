@@ -200,14 +200,12 @@ function displayImages(message) {
         
         let unreadMsgs = await createUrl(UNREAD_MSGS, {}, {}, 'GET');
         setUnreadMsgs(unreadMsgs.allUr);
+
         updateUnread.channel_id = channelNo;
-        if(messages != undefined && messages[messages.length - 1] != undefined)
-          updateUnread.message_id = messages[messages.length - 1].id
         await createUrl(UPDATE_UNREAD, updateUnread, {}, 'POST');
 
-
-        replyParentDict.message_id = messageNo;
         if(messageNo > 0){
+          replyParentDict.message_id = messageNo;
           let repliedParentName = await createUrl(REPLY_PARENT, replyParentDict, {}, 'GET');
           setReplyParentName(repliedParentName.allM[0].name);
         }

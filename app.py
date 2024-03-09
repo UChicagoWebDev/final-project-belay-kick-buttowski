@@ -279,9 +279,9 @@ def get_user_unread():
         user_id = request.headers['User-Id']
         
         msgs = query_db('select count(m.channel_id) numb, channel_id from messages m where m.replies_to = 0 and m.channel_id in '+ 
-                        '(select distinct channel_id from messages except select distinct channel_id from groups_people) ' + 
+                        '(select distinct channel_id from messages except select distinct channel_id from groups_people where user_id = ?) ' + 
                         'group by m.channel_id union select count(m.channel_id) numb, m.channel_id from messages m, groups_people ' +
-                        'gp where m.replies_to = 0 and m.channel_id = gp.channel_id and m.id > gp.message_id and gp.user_id = ? group by m.channel_id', [user_id], one=False)
+                        'gp where m.replies_to = 0 and m.channel_id = gp.channel_id and m.id > gp.message_id and gp.user_id = ? group by m.channel_id', (user_id, user_id), one=False)
         if not msgs:
             return out
         # print(msgs)
@@ -295,6 +295,8 @@ def update_unread():
     if not user:
         return app.send_static_file('404.html'), 401
     if request.method == 'POST':
-        d = query_db('delete from groups_people where user_id = ? and channel_id = ?', (request.headers['User-Id'], request.args['channel_id']), one=True)
-        u = query_db('insert into groups_people values (?, ?, ?)', (request.headers['User-Id'], request.args['channel_id'],  request.args['message_id']), one=True)
+        user_id = request.headers['User-Id']
+        channel_id = request.args['channel_id']
+        d = query_db('delete from groups_people where user_id = ? and channel_id = ?', (user_id, channel_id), one=True)
+        u = query_db('insert into groups_people select ?, ?, max(id) from messages where channel_id = ?', (request.headers['User-Id'], channel_id, channel_id), one=True)
         return {'status': 'Success'}, 200
