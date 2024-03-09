@@ -6,11 +6,12 @@ import UpdateProfile from './UpdateProfile.js';
 import NewChannel from './NewChannel.js';
 
 export default function App() {
-    console.log("App");
-    console.log(isLoggedin());
+    // console.log("App");
+    // console.log(isLoggedin());
 
     const history = ReactRouterDOM.useHistory();
     let path = window.location.pathname;
+    // console.log(path);
 
     // BrowserRouter isn't working properly when reloading the page with channel url parameter hence we are using generic way
     // if(path.startsWith("/channel/")) {

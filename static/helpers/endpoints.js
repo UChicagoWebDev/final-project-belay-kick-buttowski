@@ -7,7 +7,7 @@ export const POST_MESSAGE = '/api/room/post'
 export const POST_REPLY_MESSAGE = '/api/room/reply'
 export const SIGNUP_POINT = '/api/signup';
 export const SIGNUP_DETAILS_POINT = '/api/signup/details';
-export const LOGIN_POINT = '/api/login';
+export const LOGIN_POINT = '/api/auth/user';
 export const NEW_ROOM_POINT = '/api/rooms/new';
 export const ALL_MESSAGES_URL = '/api/room/messages';
 export const ALL_REPLIES_URL = '/api/room/replies';
@@ -15,6 +15,10 @@ export const ALL_ROOMS = '/api/rooms';
 export const UPDATE_USERNAME = '/api/update/username';
 export const UPDATE_PASSWORD = '/api/update/password';
 export const UPDATE_ROOM = '/api/update/room';
+export const GET_NO_OF_EMOJIS = '/api/message/emojis';
+export const POST_EMOJI = '/api/message/emojipost';
+export const UNREAD_MSGS = '/api/user/unread';
+export const UPDATE_UNREAD = '/api/update/user/unread';
 export const ERROR = '/api/error';
 
 export let rooms = {};
@@ -67,4 +71,19 @@ export let signUpDetails = {
 
 export let newRoomEp = {
   channelName: ''
+};
+
+export let noOfEmojis = {
+  message_id: '',
+  emoji_id: ''
+};
+
+export let postEmoji = {
+  message_id: '',
+  emoji_id: ''
+};
+
+export let updateUnread = {
+  message_id: '',
+  channel_id: ''
 };

@@ -3,7 +3,7 @@ import {createUrl, isLoggedin} from '../helpers/utils.js';
 import {LOGIN_POINT, loginDict} from '../helpers/endpoints.js';
 
 export default function Login(){
-    console.log("Login");
+    // console.log("Login");
     const history = ReactRouterDOM.useHistory();
     if(isLoggedin()){
         history.push('/belay')
@@ -21,9 +21,9 @@ export default function Login(){
         loginDict.password = formData.password;
         let loginUsr = await createUrl(LOGIN_POINT, {}, loginDict, 'POST');
         if(loginUsr.api_key.length > 0){
-            localStorage.setItem('API-KEY', loginUsr.api_key);
-            localStorage.setItem('User-Id', loginUsr.user_id);
-            localStorage.setItem('User-Name', loginUsr.user_name);
+            localStorage.setItem('harshajulakanti-API-KEY', loginUsr.api_key);
+            localStorage.setItem('harshajulakanti-User-Id', loginUsr.user_id);
+            localStorage.setItem('harshajulakanti-User-Name', loginUsr.user_name);
 
             setFormData({
                 username: '',

@@ -1,6 +1,6 @@
 const LoginButton = () => {
     const handleLogin = () => {
-        console.log('Login clicked');
+        // console.log('Login clicked');
     };
 
     return (

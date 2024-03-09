@@ -271,6 +271,15 @@ input[type="submit"]:hover {
 	border-radius: 5px;
 }
 
+.unreadmsgs {
+    cursor: pointer;
+    color: #71a0ce;
+    margin-top: 5px;
+    font-size: 0.9rem;
+	padding: 5px 5px 5px 3px;
+	font-weight: bold;
+}
+
 .message-input {
 	display: flex;
     width: auto;
@@ -419,3 +428,47 @@ input[type="submit"]:hover {
 .hide {
 	display: none;
 }
+
+.emojis {
+	margin-top: 8px;
+	font-size:small;
+}
+
+.emoji {
+	cursor: pointer;
+	margin-right: 5px;
+}
+
+.emoji:hover {
+	border: 1px solid #5a5a5a;
+	border-radius: 30px;
+	padding: 4px;
+	font-size: 5px;
+	transform: scale(1.1);
+}
+
+.tooltip {  
+	position: relative;  
+	display: inline-block;
+}  
+
+	.tooltip .tooltiptext {  
+		visibility: hidden;  
+		width: 120px;  
+		background-color: rgb(39, 39, 39);  
+		color: #fff;  
+		text-align: center;  
+		border-radius: 6px;  
+		padding: 5px 0;
+		height: auto;
+		position: absolute;  
+		font-size: small;
+		z-index: 1;  
+		bottom: 100%;  
+		left: 50%;  
+		margin-left: -60px;  
+	}
+
+	.tooltip:hover .tooltiptext {  
+		visibility: visible;  
+	}  

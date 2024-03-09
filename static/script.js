@@ -111,8 +111,8 @@ async function createUrl(endPoint, requestBody, requestHeader, endType){
   let urlHeaders = new Headers();
   urlHeaders.append("Accept", "application/json");
   urlHeaders.append("Content-Type", "application/json");
-  urlHeaders.append("Api-Key", localStorage.getItem('API-KEY'));
-  urlHeaders.append("User-Id", localStorage.getItem('User-Id'));
+  urlHeaders.append("Api-Key", localStorage.getItem('harshajulakanti-API-KEY'));
+  urlHeaders.append("User-Id", localStorage.getItem('harshajulakanti-User-Id'));
 
   Object.keys(requestHeader).forEach(function(key) {
     urlHeaders.append(key, requestHeader[key]);
@@ -157,16 +157,16 @@ function postLoggedIn(){
   let usernameSpan = document.getElementsByClassName('username');
   for(var i=0; i < usernameSpan.length; i++){
     if(usernameSpan[i].innerHTML.includes("Welcome")){
-      usernameSpan[i].innerHTML = 'Welcome back, <a onclick="updateDetails()" style="text-decoration: underline; cursor: pointer; color: blue;">' + localStorage.getItem('User-Name') + 
+      usernameSpan[i].innerHTML = 'Welcome back, <a onclick="updateDetails()" style="text-decoration: underline; cursor: pointer; color: blue;">' + localStorage.getItem('harshajulakanti-User-Name') + 
       '</a>! <a class="logout" onclick="logoutUser()" style="text-decoration: underline; cursor: pointer;">(logout)</a>'; 
     }
     else {
-      usernameSpan[i].innerHTML = '<a onclick="updateDetails()" style="text-decoration: underline; cursor: pointer; color: blue;">' + localStorage.getItem('User-Name') + 
+      usernameSpan[i].innerHTML = '<a onclick="updateDetails()" style="text-decoration: underline; cursor: pointer; color: blue;">' + localStorage.getItem('harshajulakanti-User-Name') + 
       '</a>! <a class="logout" onclick="logoutUser()" style="text-decoration: underline; cursor: pointer;">(logout)</a>'; 
     }
   }
   var usernameInput = document.querySelector('input[name="username"]');
-  usernameInput.value = localStorage.getItem('User-Name');
+  usernameInput.value = localStorage.getItem('harshajulakanti-User-Name');
 }
 
 function postLoggedOut(){
@@ -198,9 +198,9 @@ function setUrlAndLoad(url){
 // Identity management
 async function signUpUser() {
   postMsg = await createUrl(SIGNUP_POINT, {}, {}, 'POST');
-  localStorage.setItem('API-KEY', postMsg.api_key);
-  localStorage.setItem('User-Id', postMsg.user_id);
-  localStorage.setItem('User-Name', postMsg.user_name);
+  localStorage.setItem('harshajulakanti-API-KEY', postMsg.api_key);
+  localStorage.setItem('harshajulakanti-User-Id', postMsg.user_id);
+  localStorage.setItem('harshajulakanti-User-Name', postMsg.user_name);
   setUrlAndLoad('');
 }
 
@@ -208,14 +208,14 @@ async function signUpUserWithDetails() {
   signUpDetails.userName = document.getElementById('username').value;
   signUpDetails.Password = document.getElementById('password').value;
   postMsg = await createUrl(SIGNUP_DETAILS_POINT, {}, signUpDetails, 'POST');
-  localStorage.setItem('API-KEY', postMsg.api_key);
-  localStorage.setItem('User-Id', postMsg.user_id);
-  localStorage.setItem('User-Name', postMsg.user_name);
+  localStorage.setItem('harshajulakanti-API-KEY', postMsg.api_key);
+  localStorage.setItem('harshajulakanti-User-Id', postMsg.user_id);
+  localStorage.setItem('harshajulakanti-User-Name', postMsg.user_name);
   setUrlAndLoad('');
 }
 
 function logoutUser(){
-  localStorage.removeItem('API-KEY');
+  localStorage.removeItem('harshajulakanti-API-KEY');
   rooms = {};
   let messagesDiv = document.body.querySelector(".roomList");
   let child = messagesDiv.lastElementChild;
@@ -234,9 +234,9 @@ async function loginUser(){
   document.getElementById('password').value = '';
   let loginUsr = await createUrl(LOGIN_POINT, {}, loginDict, 'POST');
   if(loginUsr.api_key.length > 0){
-    localStorage.setItem('API-KEY', loginUsr.api_key);
-    localStorage.setItem('User-Id', loginUsr.user_id);
-    localStorage.setItem('User-Name', loginUsr.user_name);
+    localStorage.setItem('harshajulakanti-API-KEY', loginUsr.api_key);
+    localStorage.setItem('harshajulakanti-User-Id', loginUsr.user_id);
+    localStorage.setItem('harshajulakanti-User-Name', loginUsr.user_name);
     setUrlAndLoad(old_path.length > 0 ? old_path : '');
   } else {
     document.querySelector('.login .failed').setAttribute("style", "display: flex");
@@ -247,7 +247,7 @@ async function loginUser(){
 async function updateUsername(){
   postUpdateNameRequest.user_name = document.querySelector('input[name="username"]').value;
   postMsg = await createUrl(UPDATE_USERNAME, postUpdateNameRequest, {}, 'POST');
-  localStorage.setItem('User-Name', postMsg['name']);
+  localStorage.setItem('harshajulakanti-User-Name', postMsg['name']);
   postLoggedIn();
 }
 
@@ -336,7 +336,7 @@ async function updateDetails(){
 // Show me a new "page"
 let router = async () => {
   let path = window.location.pathname;
-  if(localStorage.getItem('API-KEY') == null){
+  if(localStorage.getItem('harshajulakanti-API-KEY') == null){
     postLoggedOut();
 
     // There is no point of splash screen if we point every request to login screen if user isn't loggedin.
@@ -366,7 +366,7 @@ let router = async () => {
   if(path == "/" || path == "/room") {
     document.title = 'Home';
     showOnly(SPLASH);
-    if(localStorage.getItem('API-KEY') != null){
+    if(localStorage.getItem('harshajulakanti-API-KEY') != null){
       await populateRooms();
     }
   }

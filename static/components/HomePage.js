@@ -1,10 +1,9 @@
 import { createRef } from 'react';
-import { ALL_MESSAGES_URL, ALL_REPLIES_URL, ALL_ROOMS, POST_MESSAGE, POST_REPLY_MESSAGE, UPDATE_ROOM, getAllMsgsRequest, getAllRepliesRequest, postReplyRequest, postRequest, postUpdateRoomRequest } from '../helpers/endpoints.js';
+import { ALL_MESSAGES_URL, ALL_REPLIES_URL, ALL_ROOMS, GET_NO_OF_EMOJIS, POST_EMOJI, POST_MESSAGE, POST_REPLY_MESSAGE, UNREAD_MSGS, UPDATE_ROOM, UPDATE_UNREAD, getAllMsgsRequest, getAllRepliesRequest, noOfEmojis, postEmoji, postReplyRequest, postRequest, postUpdateRoomRequest, updateUnread } from '../helpers/endpoints.js';
 import {createUrl, isLoggedin} from '../helpers/utils.js';
 import Header from './Header.js';
 
-export default function HomePage({channelNo}) {
-  console.log("Home");
+export default function HomePage({channelNo, messageNo}) {
   const history = ReactRouterDOM.useHistory();
   if(!isLoggedin()){
     history.push('/login')
@@ -23,11 +22,69 @@ export default function HomePage({channelNo}) {
   const [repliesOf, setRepliesOf] = React.useState(-1);
   const [replies, setReplies] = React.useState([]);
 
+  const [unReadMsgs, setUnreadMsgs] = React.useState({});
+
+  const [imagesDiv, setImagesDiv] = React.useState();
+
+  const [emojiUsers, setEmojiUsers] = React.useState([]);
+  const [whichEmoji, setWhichEmoji] = React.useState({
+    'msgId': -1,
+    'emojiId': -1
+  });
+
+  const handleMouseEnter = async (msg_id, emoji_id) => {
+    noOfEmojis.message_id = msg_id;
+    noOfEmojis.emoji_id = emoji_id;
+    let retrievedEmojis = await createUrl(GET_NO_OF_EMOJIS, noOfEmojis, {}, 'GET');
+    // console.log(retrievedEmojis.allChannels);
+    setEmojiUsers(retrievedEmojis.allE)
+    setWhichEmoji({
+      'msgId': msg_id,
+      'emojiId': emoji_id
+    })
+  };
+
+  const handleMouseLeave = (msg_id, emoji_id) => {
+    setWhichEmoji({
+      'msgId': -1,
+      'emojiId': -1
+    });
+  };
+
+  const emojis = [
+    { id: 1, symbol: '😊' },
+    { id: 2, symbol: '❤️' },
+    { id: 3, symbol: '😂' },
+    { id: 4, symbol: '👍' },
+    { id: 5, symbol: '😍' }
+  ];
+
+  const handleEmojiClick = async (messageId, emojiId) => {
+    postEmoji.emoji_id = emojiId;
+    postEmoji.message_id = messageId;
+    await createUrl(POST_EMOJI, postEmoji, {}, 'POST')
+    // let temp = emojiUsers;
+    // temp = temp.push(localStorage.getItem('User-Name'))
+    // setEmojiUsers(temp)
+  };
 
   const handleChannelClick = async (channel) => {
     history.push('/channel/' + channel);
   };
   
+
+  function extractImageUrls(message) {
+    const regex = /(https?:\/\/.*\.(?:png|jpg|gif))/gi;
+    return message.match(regex) || [];
+}
+
+function displayImages(message) {
+    const imageUrls = extractImageUrls(message);
+    return imageUrls.map((imageUrl, index) => (
+        <img key={index} src={imageUrl} alt={`Image ${index + 1}`} />
+    ));
+}
+
   const sendMessage = async () => {
       if (message.trim() === '') return;
   
@@ -75,7 +132,13 @@ export default function HomePage({channelNo}) {
           let replies = await createUrl(ALL_REPLIES_URL, getAllRepliesRequest, {}, 'GET')
           setReplies(replies.allR);
         }
-    }, 200);
+        let unreadMsgs = await createUrl(UNREAD_MSGS, {}, {}, 'GET');
+        setUnreadMsgs(unreadMsgs.allUr);
+        updateUnread.channel_id = channelNo;
+        if(messages != undefined && messages[messages.length - 1] != undefined)
+          updateUnread.message_id = messages[messages.length - 1].id
+        await createUrl(UPDATE_UNREAD, updateUnread, {}, 'POST')
+    }, 300);
 
     setIntervalId(intervalId);
 
@@ -103,7 +166,7 @@ export default function HomePage({channelNo}) {
 
   const handleReply = (messageId) => {
     setRepliesOf(messageId);
-    console.log(`Replying to message with ID ${messageId}`);
+    // console.log(`Replying to message with ID ${messageId}`);
   };
 
   const closeReplies = () => {
@@ -127,7 +190,12 @@ export default function HomePage({channelNo}) {
                     </div>
                   ) : (
                     <div key={channel.id} className={channel.id == channelNo ? 'channel-item-container active' : 'channel-item-container'} onClick={() => handleChannelClick(channel.id)}>
-                        {channel.name}
+                        # {channel.name}
+                        {unReadMsgs[channel.id] != undefined && unReadMsgs[channel.id] > 0 && (
+                          <div className="unreadmsgs">
+                              {unReadMsgs[channel.id]} {'New Messages'}
+                          </div>
+                        )}
                         <span key={channel.id + allChannels.length} className="material-symbols-outlined md-18" onClick={() => handleEditClick(channel.id)}>edit</span>
                     </div>
                   )
@@ -144,8 +212,26 @@ export default function HomePage({channelNo}) {
                     <div key={msg.id} className="message">
                         <div className="author">{msg.name}</div>
                         <div className="body">{msg.body}</div>
+                        {displayImages(msg.body)}
                         <div className="reply-button" onClick={() => handleReply(msg.id)}>
                           <span className="material-symbols-outlined md-18">reply</span>
+                        </div>
+                        <div className="emojis">
+                          {emojis.map(emoji => (
+                            <span
+                              key={emoji.id}
+                              className="emoji"
+                              onClick={() => {
+                                handleEmojiClick(msg.id, emoji.id);
+                              }}
+                              onMouseEnter={() => handleMouseEnter(msg.id, emoji.id)} onMouseLeave={() => handleMouseLeave(msg.id, emoji.id)}
+                              style={{ cursor: 'pointer', marginRight: '5px', fontSize: '20px' }}
+                            >
+                              <div className="tooltip">{emoji.symbol}{(emoji.id == whichEmoji['emojiId'] && msg.id == whichEmoji['msgId']) ? emojiUsers.length : <></>}
+                                  {(emoji.id == whichEmoji['emojiId'] && msg.id == whichEmoji['msgId'] && emojiUsers.length > 0) ? (<span className="tooltiptext">{emojiUsers.map((name) => name + ", ")}</span>) : <></>}
+                              </div>
+                            </span>
+                          ))}
                         </div>
                         {msg.replies > 0 && (
                           <div className="replies" onClick={() => handleReply(msg.id)}>
@@ -168,8 +254,6 @@ export default function HomePage({channelNo}) {
           </div>
         </div>
 
-        
-
         {
           repliesOf > 0 ? (
             <div className="replies-container">
@@ -182,6 +266,23 @@ export default function HomePage({channelNo}) {
                       <div key={msg.id} className="message">
                           <div className="author">{msg.name}</div>
                           <div className="body">{msg.body}</div>
+                          <div className="emojis">
+                          {emojis.map(emoji => (
+                              <span
+                                key={emoji.id}
+                                className="emoji"
+                                onClick={() => {
+                                  handleEmojiClick(msg.id, emoji.id);
+                                }}
+                                onMouseEnter={() => handleMouseEnter(msg.id, emoji.id)} onMouseLeave={() => handleMouseLeave(msg.id, emoji.id)}
+                                style={{ cursor: 'pointer', marginRight: '5px', fontSize: '20px' }}
+                              >
+                                <div className="tooltip">{emoji.symbol}{(emoji.id == whichEmoji['emojiId'] && msg.id == whichEmoji['msgId']) ? emojiUsers.length : <></>}
+                                    {(emoji.id == whichEmoji['emojiId'] && msg.id == whichEmoji['msgId'] && emojiUsers.length > 0) ? (<span className="tooltiptext">{emojiUsers.map((name) => name + ", ")}</span>) : <></>}
+                                </div>
+                              </span>
+                            ))}
+                          </div>
                       </div>
                     </>
                 ))}

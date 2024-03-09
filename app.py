@@ -48,6 +48,7 @@ def query_db(query, args=(), one=False):
 @app.route('/update')
 @app.route('/newchannel')
 @app.route('/channel/<channel_id>')
+@app.route('/channel/message/<message_id>')
 def index(channel_id=None):
     return app.send_static_file('index.html')
 
@@ -57,7 +58,7 @@ def validate_user_api_key(req):
         return query_db('select * from users where api_key = ?', [api_key], one=True)
     return None
 
-@app.route('/api/login', methods = ['POST'])
+@app.route('/api/auth/user', methods = ['POST'])
 def login():
     if request.method == 'POST':
         userName = request.headers['userName']
@@ -223,3 +224,62 @@ def get_all_replies():
         out['allR'] = msgsList
         print(out)
     return out, 200
+
+@app.route('/api/message/emojis', methods=['GET'])
+def get_all_emojjis():
+    out = {'allE': []}
+    user = validate_user_api_key(request)
+    if not user:
+        return app.send_static_file('404.html'), 401
+    if request.method == 'GET':
+        message_id = request.args['message_id']
+        emoji_id = request.args['emoji_id']
+        
+        msgs = query_db('select user_id, name from emojis e, users u where msg_id= ? and emoji_id = ? and u.id = e.user_id', [message_id, emoji_id], one=False)
+        if not msgs:
+            return out
+        emojis = []
+        for msg in msgs:
+            emojis.append(msg['name'])
+        out['allE'] = emojis
+    return out, 200
+
+@app.route('/api/message/emojipost', methods=['POST'])
+def post_emoji():
+    user = validate_user_api_key(request)
+    if not user:
+        return app.send_static_file('404.html'), 401
+    if request.method == 'POST':
+        u = query_db('insert into emojis values (?, ?, ?)',
+            (request.args['emoji_id'], request.args['message_id'], request.headers['User-Id'] ), one=True)
+        return {'status': 'Success'}, 200
+
+@app.route('/api/user/unread', methods=['GET'])
+def get_user_unread():
+    out = {'allUr': {}}
+    user = validate_user_api_key(request)
+    if not user:
+        return app.send_static_file('404.html'), 401
+    if request.method == 'GET':
+        user_id = request.headers['User-Id']
+        
+        msgs = query_db('select count(m.channel_id) numb, channel_id from messages m where m.replies_to = 0 and m.channel_id in '+ 
+                        '(select distinct channel_id from messages except select distinct channel_id from groups_people) ' + 
+                        'group by m.channel_id union select count(m.channel_id) numb, m.channel_id from messages m, groups_people ' +
+                        'gp where m.replies_to = 0 and m.channel_id = gp.channel_id and m.id > gp.message_id and gp.user_id = ? group by m.channel_id', [user_id], one=False)
+        if not msgs:
+            return out
+        print(msgs)
+        for msg in msgs:
+            out['allUr'][msg ['channel_id']] = msg['numb']
+    return out, 200
+
+@app.route('/api/update/user/unread', methods=['POST'])
+def update_unread():
+    user = validate_user_api_key(request)
+    if not user:
+        return app.send_static_file('404.html'), 401
+    if request.method == 'POST':
+        d = query_db('delete from groups_people where user_id = ? and channel_id = ?', (request.headers['User-Id'], request.args['channel_id']), one=True)
+        u = query_db('insert into groups_people values (?, ?, ?)', (request.headers['User-Id'], request.args['channel_id'],  request.args['message_id']), one=True)
+        return {'status': 'Success'}, 200

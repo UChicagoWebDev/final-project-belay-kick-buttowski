@@ -6,8 +6,8 @@ export async function createUrl(endPoint, requestBody, requestHeader, endType){
     const urlHeaders = new Headers({
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "Api-Key": localStorage.getItem('API-KEY'),
-        "User-Id": localStorage.getItem('User-Id')
+        "Api-Key": localStorage.getItem('harshajulakanti-API-KEY'),
+        "User-Id": localStorage.getItem('harshajulakanti-User-Id')
     });
   
     Object.keys(requestHeader).forEach(function(key) {
@@ -25,5 +25,5 @@ export async function createUrl(endPoint, requestBody, requestHeader, endType){
 }
 
 export function isLoggedin() {
-  return !(localStorage.getItem('API-KEY') == null || localStorage.getItem('API-KEY') == '')
+  return !(localStorage.getItem('harshajulakanti-API-KEY') == null || localStorage.getItem('harshajulakanti-API-KEY') == '')
 };
