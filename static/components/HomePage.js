@@ -363,6 +363,7 @@ function displayImages(message) {
                       <div key={msg.id} className="message">
                           <div className="author">{msg.name}</div>
                           <div className="body">{msg.body}</div>
+                          {displayImages(msg.body)}
                           <div className="emojis">
                           {emojis.map(emoji => (
                               <span
