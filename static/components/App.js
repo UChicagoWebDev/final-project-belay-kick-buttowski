@@ -28,7 +28,7 @@ export default function App() {
                     <ReactRouterDOM.Route
                         path="/belay"
                         render={props => (
-                            <HomePage channelNo={'1'} />
+                            <HomePage channelNo={-1} />
                         )}
                     />
                     <ReactRouterDOM.Route path="/login" component={Login} />
@@ -54,7 +54,7 @@ export default function App() {
                     <ReactRouterDOM.Route
                         path="/"
                         render={props => (
-                            <HomePage channelNo={'1'} />
+                            <HomePage channelNo={-1} messageNo={-1}/>
                         )}
                     />
                 </ReactRouterDOM.Switch>

@@ -223,8 +223,18 @@ input[type="submit"]:hover {
 	padding-top: 5px;
 	width: calc(100% - 20px);
 }
+.message-container .conversation {
+	padding-top: 5px;
+	width: calc(100% - 21px);
+}
 
 .replies-container .close-button {
+	float: right;
+	padding: 10px;
+    cursor: pointer;
+    color: #6792bd;
+}
+.message-container .close-button {
 	float: right;
 	padding: 10px;
     cursor: pointer;
@@ -456,7 +466,7 @@ input[type="submit"]:hover {
 		visibility: hidden;  
 		width: 120px;  
 		background-color: rgb(39, 39, 39);  
-		color: #fff;  
+		color: #fff;
 		text-align: center;  
 		border-radius: 6px;  
 		padding: 5px 0;
@@ -472,3 +482,38 @@ input[type="submit"]:hover {
 	.tooltip:hover .tooltiptext {  
 		visibility: visible;  
 	}  
+
+	.welcome-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.welcome-box {
+  text-align: center;
+  padding: 20px;
+  border: 2px solid #333;
+  border-radius: 10px;
+}
+
+.welcome-message {
+  color: #1d1d1d;
+}
+
+.parent-message {
+	background-color: #4a4a4a;
+	border: 1px solid #000000;
+	border-radius: 8px;
+	padding: 10px;
+	margin-bottom: 10px;
+	overflow: hidden;
+  }
+  
+  .parent-message-text {
+	margin: 0;
+	color: #ffffff;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+  }

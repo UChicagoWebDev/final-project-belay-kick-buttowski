@@ -118,7 +118,7 @@ def get_all_rooms():
         return app.send_static_file('404.html'), 401
     if request.method == 'GET':
         rooms = query_db('select * from channels')
-        print(rooms)
+        # print(rooms)
         roomsList = []
         if rooms is not None:
             for msg in rooms:
@@ -169,7 +169,7 @@ def update_password():
 
 @app.route('/api/rooms/new', methods=['POST'])
 def create_room():
-    print("create room")
+    # print("create room")
     user = validate_user_api_key(request)
     if not user:
         return app.send_static_file('404.html'), 401
@@ -222,7 +222,22 @@ def get_all_replies():
         for msg in msgs:
             msgsList.append({'id': msg[0], 'name': msg[1], 'body': msg[2], 'replies': 1})
         out['allR'] = msgsList
-        print(out)
+    return out, 200
+
+@app.route('/api/reply/parent', methods=['GET'])
+def get_message_name():
+    out = {'allM': []}
+    user = validate_user_api_key(request)
+    if not user:
+        return app.send_static_file('404.html'), 401
+    if request.method == 'GET':
+        message_id = request.args['message_id']
+        # print(message_id)
+        msgs = query_db('select m.body from messages m where m.id = ?', [message_id], one=True)
+        if not msgs:
+            return out
+        out['allM'].append({'name': msgs['body']})
+        # print(out)
     return out, 200
 
 @app.route('/api/message/emojis', methods=['GET'])
@@ -269,7 +284,7 @@ def get_user_unread():
                         'gp where m.replies_to = 0 and m.channel_id = gp.channel_id and m.id > gp.message_id and gp.user_id = ? group by m.channel_id', [user_id], one=False)
         if not msgs:
             return out
-        print(msgs)
+        # print(msgs)
         for msg in msgs:
             out['allUr'][msg ['channel_id']] = msg['numb']
     return out, 200

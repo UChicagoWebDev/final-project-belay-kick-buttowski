@@ -1,5 +1,5 @@
-import { createRef } from 'react';
-import { ALL_MESSAGES_URL, ALL_REPLIES_URL, ALL_ROOMS, GET_NO_OF_EMOJIS, POST_EMOJI, POST_MESSAGE, POST_REPLY_MESSAGE, UNREAD_MSGS, UPDATE_ROOM, UPDATE_UNREAD, getAllMsgsRequest, getAllRepliesRequest, noOfEmojis, postEmoji, postReplyRequest, postRequest, postUpdateRoomRequest, updateUnread } from '../helpers/endpoints.js';
+import { createRef, useState } from 'react';
+import { ALL_MESSAGES_URL, ALL_REPLIES_URL, ALL_ROOMS, GET_NO_OF_EMOJIS, POST_EMOJI, POST_MESSAGE, POST_REPLY_MESSAGE, REPLY_PARENT, UNREAD_MSGS, UPDATE_ROOM, UPDATE_UNREAD, getAllMsgsRequest, getAllRepliesRequest, noOfEmojis, postEmoji, postReplyRequest, postRequest, postUpdateRoomRequest, replyParentDict, updateUnread } from '../helpers/endpoints.js';
 import {createUrl, isLoggedin} from '../helpers/utils.js';
 import Header from './Header.js';
 
@@ -14,10 +14,21 @@ export default function HomePage({channelNo, messageNo}) {
   }
   
   document.title = 'Channel ' + channelNo;
+
+  const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
+  // console.log(windowWidth)
+  const [parentMessage, setParentMessage] = React.useState('');
+
+
+  const [showChannelsPanel, setShowChannelsPanel] = React.useState(false);
+  const [showMessageContainer, setShowMessageContainer] = React.useState(false);
+  const [showRepliesContainer, setShowRepliesContainer] = React.useState(false);
+
   const [allChannels, setAllChannels] = React.useState([]);
   const [intervalId, setIntervalId] = React.useState(null);
   const [roomName, setNewRoomName] = React.useState("");
   const [editingChannel, setEditingChannel] = React.useState(-1);
+  
   const [message, setMessage] = React.useState('');
   const [messages, setMessages] = React.useState([]);
 
@@ -25,12 +36,65 @@ export default function HomePage({channelNo, messageNo}) {
   const [replies, setReplies] = React.useState([]);
 
   const [unReadMsgs, setUnreadMsgs] = React.useState({});
+  const [replyParentName, setReplyParentName] = React.useState([]);
 
   const [emojiUsers, setEmojiUsers] = React.useState([]);
   const [whichEmoji, setWhichEmoji] = React.useState({
     'msgId': -1,
     'emojiId': -1
   });
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  const handleShowChannelsPanel = () => {
+    setShowChannelsPanel(true);
+    setShowMessageContainer(false);
+    setShowRepliesContainer(false);
+  };
+
+  const handleShowMessageContainer = () => {
+    setShowChannelsPanel(false);
+    setShowMessageContainer(true);
+    setShowRepliesContainer(false);
+  };
+
+  const handleShowRepliesContainer = () => {
+    setShowChannelsPanel(false);
+    setShowMessageContainer(false);
+    setShowRepliesContainer(true);
+  };
+
+  const updateScreen = () => {
+    if (windowWidth < 800) {
+      if(messageNo < 0 && channelNo > 0){
+        handleShowMessageContainer()
+      }
+      else if(messageNo > 0){
+        handleShowRepliesContainer()
+      }
+      else {
+        handleShowChannelsPanel()
+      }
+    } else {
+      setShowChannelsPanel(true);
+      setShowMessageContainer(true);
+      setShowRepliesContainer(true);
+    }
+  }
+
+  React.useEffect(() => {
+    updateScreen();
+  }, [windowWidth, messages]);
 
   const handleMouseEnter = async (msg_id, emoji_id) => {
     noOfEmojis.message_id = msg_id;
@@ -124,6 +188,7 @@ function displayImages(message) {
         getAllMsgsRequest.room_id = channelNo;
         getAllRepliesRequest.room_id = channelNo;
         getAllRepliesRequest.message_id = messageNo;
+
         let retrievedMessages = await createUrl(ALL_MESSAGES_URL, getAllMsgsRequest, {}, 'GET');
         let rooms = await createUrl(ALL_ROOMS, {}, {}, 'GET')
         setMessages(retrievedMessages.allM);
@@ -132,12 +197,20 @@ function displayImages(message) {
           let replies = await createUrl(ALL_REPLIES_URL, getAllRepliesRequest, {}, 'GET')
           setReplies(replies.allR);
         }
+        
         let unreadMsgs = await createUrl(UNREAD_MSGS, {}, {}, 'GET');
         setUnreadMsgs(unreadMsgs.allUr);
         updateUnread.channel_id = channelNo;
         if(messages != undefined && messages[messages.length - 1] != undefined)
           updateUnread.message_id = messages[messages.length - 1].id
-        await createUrl(UPDATE_UNREAD, updateUnread, {}, 'POST')
+        await createUrl(UPDATE_UNREAD, updateUnread, {}, 'POST');
+
+
+        replyParentDict.message_id = messageNo;
+        if(messageNo > 0){
+          let repliedParentName = await createUrl(REPLY_PARENT, replyParentDict, {}, 'GET');
+          setReplyParentName(repliedParentName.allM[0].name);
+        }
     }, 300);
 
     setIntervalId(intervalId);
@@ -164,8 +237,9 @@ function displayImages(message) {
     setNewRoomName(value);
   };
 
-  const handleReply = (messageId) => {
-    history.push('/channel/' + channelNo + '/message/' + messageId);
+  const handleReply = (messageId, messageName) => {
+    // history.push('/channel/' + channelNo + '/message/' + messageId);
+    history.push( '/channel/' + channelNo + '/message/' + messageId );
     // setRepliesOf(messageId);
     // console.log(`Replying to message with ID ${messageId}`);
   };
@@ -175,11 +249,16 @@ function displayImages(message) {
     // setRepliesOf(-1);
   }
 
+  const closeMessages = () => {
+    history.push('/belay');
+    // setRepliesOf(-1);
+  }
+
   return (
     <>
       <Header handleLogout={handleLogout}/>
       <div className="home-screen">
-        <div className="channels-panel">
+        {showChannelsPanel && (<div className="channels-panel">
           <h2>Channels</h2>
           <ul>
             {allChannels.map(channel => (
@@ -205,9 +284,12 @@ function displayImages(message) {
               </>
             ))}
           </ul>
-        </div>
+        </div>)}
 
-        <div className="message-container">
+        {showMessageContainer && channelNo > 0 ? (<div className="message-container">
+          <div className="close-button" onClick={() => closeMessages()}>
+                  <span className="material-symbols-outlined md-18">close</span>
+          </div>
           <div className="conversation">
               {messages.map(msg => (
                   <>
@@ -215,7 +297,7 @@ function displayImages(message) {
                         <div className="author">{msg.name}</div>
                         <div className="body">{msg.body}</div>
                         {displayImages(msg.body)}
-                        <div className="reply-button" onClick={() => handleReply(msg.id)}>
+                        <div className="reply-button" onClick={() => handleReply(msg.id, msg.body)}>
                           <span className="material-symbols-outlined md-18">reply</span>
                         </div>
                         <div className="emojis">
@@ -254,15 +336,28 @@ function displayImages(message) {
             />
             <button onClick={sendMessage}>Send</button>
           </div>
-        </div>
+        </div>): <></>}
+
+        {showMessageContainer && channelNo < 0 ? (
+        <div className="message-container">
+          <div className="welcome-container">
+            <div className="welcome-box">
+              <h1 className="welcome-message">Welcome {localStorage.getItem('harshajulakanti-User-Name')},</h1>
+              <p>Start exploring by selecting a channel</p>
+            </div>
+          </div>
+        </div>) : <></>}
 
         {
-          messageNo > 0 ? (
+          (showRepliesContainer && messageNo > 0) ? (
             <div className="replies-container">
               <div className="close-button" onClick={() => closeReplies()}>
                   <span className="material-symbols-outlined md-18">close</span>
               </div>
               <div className="conversation">
+                <div className="parent-message">
+                  <p className="parent-message-text">{'Replying to ' + replyParentName}</p>
+                </div>
                 {replies.map(msg => (
                     <>
                       <div key={msg.id} className="message">

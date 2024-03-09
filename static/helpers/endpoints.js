@@ -14,6 +14,7 @@ export const GET_NO_OF_EMOJIS = '/api/message/emojis';
 export const POST_EMOJI = '/api/message/emojipost';
 export const UNREAD_MSGS = '/api/user/unread';
 export const UPDATE_UNREAD = '/api/update/user/unread';
+export const REPLY_PARENT = '/api/reply/parent';
 export const ERROR = '/api/error';
 
 export let rooms = {};
@@ -81,4 +82,8 @@ export let postEmoji = {
 export let updateUnread = {
   message_id: '',
   channel_id: ''
+};
+
+export let replyParentDict = {
+  message_id: ''
 };
